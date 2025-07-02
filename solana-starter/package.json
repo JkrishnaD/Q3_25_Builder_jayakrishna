@@ -1,0 +1,25 @@
+{
+  "name": "solana-starter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "spl_init": "ts-node ./spl_init.ts",
+    "spl_mint": "ts-node ./spl_mint.ts",
+    "spl_metadata": "ts-node ./spl_metadata.ts",
+    "spl_transfer":"ts-node ./spl_transfer.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
+    "@metaplex-foundation/umi": "^1.2.0",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.2.0",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/web3.js": "^1.98.2"
+  }
+}
