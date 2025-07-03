@@ -1,7 +1,7 @@
 import {
   CreateMetadataAccountV3InstructionArgs,
   createMetadataAccountV3,
-} from "./node_modules/@metaplex-foundation/mpl-token-metadata/dist/src/generated/instructions/createMetadataAccountV3";
+} from "@metaplex-foundation/mpl-token-metadata/dist/src/generated/instructions/createMetadataAccountV3";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
 import wallet from "./turbine3-wallet.json";
