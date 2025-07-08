@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+#![allow(deprecated)]
 use anchor_lang::{ prelude::*, system_program::{ transfer, Transfer } };
 
 declare_id!("4GVLkDuTPnMCiw7nuDrwLiGy6YzxCczxD1T4vnF6wRNM");
@@ -54,6 +56,19 @@ pub struct Initialize<'info> {
 
 impl<'info> Initialize<'info> {
     pub fn initialize(&mut self, bumps: &InitializeBumps) -> Result<()> {
+        let rent_excempt = Rent::get()?.minimum_balance(self.vault.to_account_info().data_len());
+
+        let cpi_program = self.system_program.to_account_info();
+
+        let cpi_accounts = Transfer {
+            from: self.user.to_account_info(),
+            to: self.vault.to_account_info(),
+        };
+
+        let cpi_context: CpiContext<'_, '_, '_, '_, _> = CpiContext::new(cpi_program, cpi_accounts);
+
+        transfer(cpi_context, rent_excempt)?;
+
         self.vault_state.vault_bump = bumps.vault;
         self.vault_state.state_bump = bumps.vault_state;
         Ok(())
@@ -92,6 +107,16 @@ impl<'info> Payment<'info> {
     pub fn withdraw(&mut self, amount: u64) -> Result<()> {
         let cpi_program = self.system_program.to_account_info();
 
+        let rent_excempt = Rent::get()?.minimum_balance(self.vault.data_len());
+        let balance = self.vault.to_account_info().lamports();
+
+        if balance < amount + rent_excempt {
+            return Err(ErrorCode::InsufficientBalance.into());
+        }
+
+        if amount == 0 {
+            return Ok(());
+        }
         let cpi_accounts = Transfer {
             from: self.vault.to_account_info(),
             to: self.user.to_account_info(),
@@ -154,4 +179,9 @@ impl<'info> Close<'info> {
         }
         Ok(())
     }
+}
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Insufficient balance")]
+    InsufficientBalance,
 }
