@@ -40,7 +40,7 @@ pub struct Initialize<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
-    #[account(seeds = [b"vault", user.key().as_ref()], bump)]
+    #[account(mut,seeds = [b"vault", user.key().as_ref()], bump)]
     pub vault: SystemAccount<'info>,
 
     #[account(
