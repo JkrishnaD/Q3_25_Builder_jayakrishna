@@ -2,7 +2,7 @@
 #![allow(deprecated)]
 use anchor_lang::{ prelude::*, system_program::{ transfer, Transfer } };
 
-declare_id!("4GVLkDuTPnMCiw7nuDrwLiGy6YzxCczxD1T4vnF6wRNM");
+declare_id!("68Gfz5PZD9s9t3axHcAaN4eznmX9QKTZGH9eF1zaEpKD");
 
 #[program]
 pub mod vault {
