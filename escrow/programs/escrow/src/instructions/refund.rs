@@ -15,7 +15,6 @@ use anchor_spl::{
 use crate::state::Escrow;
 
 #[derive(Accounts)]
-#[instruction(seed:u64)]
 pub struct Refund<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
@@ -71,7 +70,7 @@ impl<'info> Refund<'info> {
             from: self.vault.to_account_info(),
             mint: self.mint_a.to_account_info(),
             authority: self.escrow.to_account_info(),
-            to: self.maker.to_account_info(),
+            to: self.maker_ata_a.to_account_info(),
         };
 
         let cpi_ctx = CpiContext::new_with_signer(

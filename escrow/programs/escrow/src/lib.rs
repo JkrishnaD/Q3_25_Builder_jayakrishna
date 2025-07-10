@@ -13,36 +13,22 @@ declare_id!("CwgCa5b6vwB5DLRdtAc8rQ9gFhqUvBEoT5mk1Uh3zLWd");
 pub mod escrow {
     use super::*;
 
-    pub fn initialize(ctx: Context<Make>,seed:u64,recieve:u64) -> Result<()> {
+    pub fn initialize(ctx: Context<Make>,seed:u64,recieve:u64,deposit_amt:u64) -> Result<()> {
         ctx.accounts.init_escrow(seed, recieve, &ctx.bumps)?;
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
-    }
+        ctx.accounts.deposit(deposit_amt)?;
 
-    pub fn maker_deposite(ctx: Context<Make>,amount:u64)->Result<()>{
-        ctx.accounts.deposit(amount)?;
-        msg!("Maker deposited {} tokens", amount);
         Ok(())
     }
 
     pub fn refund(ctx: Context<Refund>)->Result<()>{
+        msg!("RefundEscrow instruction called");
         ctx.accounts.refund_and_close()?;
-        msg!("Refunded and closed escrow account");
         Ok(())
     }
 
-    pub fn taker_deposite(ctx:Context<Take>,amount:u64)->Result<()>{
-        ctx.accounts.deposite(amount)?;
-        msg!("Taker deposited {} tokens", amount);
-        Ok(())
-    }
-
-    pub fn taker_take_and_close(ctx:Context<Take>)->Result<()>{
+    pub fn take(ctx:Context<Take>,amount:u64)->Result<()>{
+        ctx.accounts.transfer_to_maker(amount)?;
         ctx.accounts.take_and_close()?;
-        msg!("Taker took and closed escrow account");
         Ok(())
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}

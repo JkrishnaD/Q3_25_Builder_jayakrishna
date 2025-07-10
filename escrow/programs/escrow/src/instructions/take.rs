@@ -90,21 +90,21 @@ pub struct Take<'info> {
 
 impl<'info> Take<'info> {
     // function to deposite the tokens by taker into the escrow vault
-    pub fn deposite(&mut self, amount: u64) -> Result<()> {
+    pub fn transfer_to_maker(&mut self, amount: u64) -> Result<()> {
         // it includes all the account whic are involved in the deposite transaction
         // transfer checked helps program to check verify the accounts,mint and the decimals
         let transer_accounts = TransferChecked {
-            from: self.taker_ata_a.to_account_info(),
+            from: self.taker_ata_b.to_account_info(),
             authority: self.taker.to_account_info(),
             mint: self.mint_b.to_account_info(),
-            to: self.vault.to_account_info(),
+            to: self.maker_ata_b.to_account_info(),
         };
 
         // adding the program and th accounts into the cpi context
         let cpi_ctx = CpiContext::new(self.token_program.to_account_info(), transer_accounts);
 
         // making a cpi and transefer the token from taker to vault
-        transfer_checked(cpi_ctx, amount, self.mint_a.decimals)?;
+        transfer_checked(cpi_ctx, amount, self.mint_b.decimals)?;
 
         Ok(())
     }
