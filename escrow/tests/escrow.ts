@@ -23,6 +23,7 @@ describe("Escrow program tests", () => {
 
   const connection = provider.connection;
 
+  // declaring the variables which will be used in the tests
   let maker: Keypair;
   let taker: Keypair;
   let mintA: PublicKey;
@@ -36,6 +37,7 @@ describe("Escrow program tests", () => {
   let seed: anchor.BN;
 
   before(async () => {
+    // seed is used to derive the escrow address
     seed = new anchor.BN(1);
 
     // assigning the addresses to both the maker and taker
@@ -54,7 +56,7 @@ describe("Escrow program tests", () => {
     mintB = await createMint(connection, taker, taker.publicKey, null, 6);
     console.log("Address of mintB:", mintB.toBase58());
 
-    // creating the associated token account for both minta and mintb
+    // for maker minta creating the associated token account
     makerAtaA = await getOrCreateAssociatedTokenAccount(
       connection,
       maker,
@@ -63,6 +65,7 @@ describe("Escrow program tests", () => {
     );
     console.log("Address of makerAtaA:", makerAtaA.address.toBase58());
 
+    //for maker mintb creating the associated token account
     makerAtaB = await getOrCreateAssociatedTokenAccount(
       connection,
       maker,
@@ -71,6 +74,7 @@ describe("Escrow program tests", () => {
     );
     console.log("Address of makerAtaA:", makerAtaA.address.toBase58());
 
+    // for taker minta creating the associated token account
     takerAtaA = await getOrCreateAssociatedTokenAccount(
       connection,
       taker,
@@ -79,6 +83,7 @@ describe("Escrow program tests", () => {
     )
     console.log("Address of takerAtaA:", takerAtaA.address.toBase58());
 
+    // for taker mintb creating the associated token account
     takerAtaB = await getOrCreateAssociatedTokenAccount(
       connection,
       taker,
@@ -96,6 +101,7 @@ describe("Escrow program tests", () => {
     );
     console.log("Minted 10000 tokens to makerAtaA:", minta_tx);
 
+    // minting 10000 tokens to makerAtaB
     const mintb_tx = await mintTo(
       connection,
       taker,
@@ -106,6 +112,7 @@ describe("Escrow program tests", () => {
     );
     console.log("Minted 10000 tokens to mnakerAtaB:", mintb_tx);
 
+    // minting 10000 tokens to takerAtaA
     const takerAtaA_tx = await mintTo(
       connection,
       maker,
@@ -116,6 +123,7 @@ describe("Escrow program tests", () => {
     );
     console.log("Minted 10000 tokens to takerAtaA:", takerAtaA_tx);
 
+    // minting 10000 tokens to takerAtaB
     const takerAtaB_tx = await mintTo(
       connection,
       taker,
@@ -144,9 +152,8 @@ describe("Escrow program tests", () => {
     );
   });
 
-  console.log("✅ Vault Address: ", vault);
-
-
+  // test cases
+  // this test case is for the maker to create an escrow
   it("Make escrow!", async () => {
     // Add your test here.
     const tx = await program.methods.initialize(seed, new BN(1e6), new anchor.BN(1e6)).accountsPartial({
@@ -164,8 +171,7 @@ describe("Escrow program tests", () => {
     console.log("Make escrow signature", tx);
 
   });
-
-
+// this test case is for the taker to take the escrow
   it("Take escrow!", async () => {
     const tx = await program.methods.take(new BN(1e6)).accountsPartial({
       escrow,
@@ -184,7 +190,7 @@ describe("Escrow program tests", () => {
     }).signers([taker]).rpc();
     console.log("Take escrow signature", tx);
   })
-
+// this is the test case if the maker wants to refund the escrow
   it("Refund escrow!", async () => {
     const tx = await program.methods.refund().accountsPartial({
       escrow,
@@ -214,7 +220,7 @@ async function airdrop(
 
   let confirmedAirdrop = await connection.confirmTransaction(tx, "confirmed");
   console.log(`Airdropped ${amount} SOL to ${address.toBase58()}`);
-  console.log("✅ Tx Signature: ", confirmedAirdrop);
+  console.log("Tx Signature: ", confirmedAirdrop);
 
   return confirmedAirdrop;
 }
