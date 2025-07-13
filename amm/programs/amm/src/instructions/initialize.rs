@@ -58,7 +58,7 @@ impl<'info> Initialize<'info> {
     pub fn init(
         &mut self,
         seed: u64, // a seed to make the config account unique
-        fee: u64,
+        fee: u16,
         authority: Option<Pubkey>,
         bumps: InitializeBumps // bump seeds for the accounts
     ) -> Result<()> {
