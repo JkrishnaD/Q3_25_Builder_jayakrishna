@@ -99,6 +99,8 @@ impl<'info> Deposite<'info> {
             }
         };
 
+        // slipage:- it is the difference between the expected amount and the actual amount
+        // checking if the x and y amounts are less than or equal to the max_x and max_y
         require!(x <= max_x && y <= max_y, AmmError::SlippageExceeded);
 
         self.deposite_tokens(true, x)?;

@@ -21,7 +21,7 @@ pub mod amm {
     pub fn initialize(
         ctx: Context<Initialize>,
         seed: u64,
-        fee: u64,
+        fee: u16,
         authority: Option<Pubkey>
     ) -> Result<()> {
         ctx.accounts.init(seed, fee, authority, ctx.bumps)
