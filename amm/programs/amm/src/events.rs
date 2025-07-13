@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 #[event]
 pub struct InitializeEvent {
-    pub admin: Pubkey,
+    pub initializer: Pubkey,
     pub mint_x: Pubkey,
     pub mint_y: Pubkey,
     pub mint_lp: Pubkey,
