@@ -35,12 +35,12 @@ pub struct SwapEvent {
     pub mint_lp: Pubkey,
     pub vault_x: Pubkey,
     pub vault_y: Pubkey,
-    pub user_lp: Pubkey,
     pub config: Pubkey,
     pub amount: u64,
     pub min: u64,
 }
 
+#[event]
 pub struct WithdrawEvent {
     pub user: Pubkey,
     pub mint_x: Pubkey,
@@ -59,4 +59,5 @@ pub struct WithdrawEvent {
 pub struct UpdateEvent {
     pub user: Pubkey,
     pub config: Pubkey,
+    pub locked:bool
 }
