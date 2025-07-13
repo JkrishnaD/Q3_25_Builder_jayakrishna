@@ -12,3 +12,4 @@ pub struct Config {
     pub config_bump: u8, // bump seed to fing this particular
     pub lp_bump: u8, // bump seed to find this liquidity pool token
 }
+
