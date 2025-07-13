@@ -1,7 +1,6 @@
 use anchor_lang::error_code;
 use constant_product_curve::CurveError;
 
-use crate::Swap;
 
 #[error_code]
 pub enum AmmError {
