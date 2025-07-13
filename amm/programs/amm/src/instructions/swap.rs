@@ -26,7 +26,7 @@ pub struct Swap<'info> {
     #[account(
         has_one = mint_x,
         has_one = mint_y,
-        seeds = [b"config", &config.seed.to_le_bytes()],
+        seeds = [b"config", &config.seed.to_le_bytes().as_ref()],
         bump
     )]
     pub config: Account<'info, Config>,
