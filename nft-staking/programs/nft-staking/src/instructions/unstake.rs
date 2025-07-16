@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{ transfer, Mint, Token, TokenAccount, Transfer },
+    token::{transfer, Mint, Token, TokenAccount, Transfer},
 };
 
-use crate::{ StakeAccount, StakeConfig, UserAccount, error::ErrorCode };
+use crate::{error::ErrorCode, StakeAccount, StakeConfig, UserAccount};
 
 #[derive(Accounts)]
 pub struct Unstake<'info> {
@@ -46,12 +46,9 @@ pub struct Unstake<'info> {
         seeds = [b"vault", nft_mint.key().as_ref()],
         bump,
         token::mint = nft_mint,
-        token::authority = vault_authority
+        token::authority = config
     )]
     pub vault_pda: Account<'info, TokenAccount>,
-
-    #[account(seeds = [b"vault_authority"], bump)]
-    pub vault_authority: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
@@ -59,7 +56,7 @@ pub struct Unstake<'info> {
 }
 
 impl<'info> Unstake<'info> {
-    pub fn unstake(&mut self, bumps: &UnstakeBumps) -> Result<()> {
+    pub fn unstake(&mut self) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
 
         // checking if the freezing period is over or not
@@ -84,10 +81,10 @@ impl<'info> Unstake<'info> {
         let cpi_accounts = Transfer {
             from: self.vault_pda.to_account_info(),
             to: self.user_nft_ata.to_account_info(),
-            authority: self.vault_authority.to_account_info(),
+            authority: self.config.to_account_info(),
         };
 
-        let seeds: &[&[u8]; 2] = &[b"vault_authority", &[bumps.vault_authority]];
+        let seeds: &[&[u8]; 2] = &[b"config", &[self.config.bump]];
 
         let signer_seeds = &[&seeds[..]];
 

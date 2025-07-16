@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{ transfer, Mint, Token, TokenAccount, Transfer },
+    token::{transfer, Mint, Token, TokenAccount, Transfer},
 };
 
-use crate::{ StakeAccount, StakeConfig, UserAccount };
+use crate::{StakeAccount, StakeConfig, UserAccount};
 
 #[derive(Accounts)]
 pub struct Stake<'info> {
@@ -55,13 +55,9 @@ pub struct Stake<'info> {
         seeds = [b"vault", nft_mint.key().as_ref()],
         bump,
         token::mint = nft_mint,
-        token::authority = vault_authority
+        token::authority = config
     )]
     pub vault_pda: Account<'info, TokenAccount>,
-
-    // the vault authority which is a PDA that controls the vault
-    #[account(seeds = [b"vault_authority"], bump)]
-    pub vault_authority: UncheckedAccount<'info>,
 
     // program accounts used for token operations
     pub token_program: Program<'info, Token>,
