@@ -30,13 +30,14 @@ pub mod nft_staking {
         Ok(())
     }
 
-    pub fn initialize_config(ctx: Context<InitializeConfig>) -> Result<()> {
-        ctx.accounts.initialize_config(
-            ctx.accounts.config.max_stake,
-            ctx.accounts.config.points_per_stake,
-            ctx.accounts.config.freeze_period,
-            &ctx.bumps,
-        )?;
+    pub fn initialize_config(
+        ctx: Context<InitializeConfig>,
+        max_stake: u8,
+        points_per_stake: u8,
+        freeze_period: u32,
+    ) -> Result<()> {
+        ctx.accounts
+            .initialize_config(max_stake, points_per_stake, freeze_period, &ctx.bumps)?;
 
         emit!(InitializeConfigEvent {
             config: ctx.accounts.config.key(),
