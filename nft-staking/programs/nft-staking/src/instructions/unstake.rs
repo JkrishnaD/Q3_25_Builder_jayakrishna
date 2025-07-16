@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{transfer, Mint, Token, TokenAccount, Transfer},
+    token::{thaw_account, transfer, Mint, ThawAccount, Token, TokenAccount, Transfer},
 };
 
 use crate::{error::ErrorCode, StakeAccount, StakeConfig, UserAccount};
@@ -74,6 +74,24 @@ impl<'info> Unstake<'info> {
 
         // from total stakes reducing one for this unstake
         self.user_account.amount_staked -= 1;
+
+        // checking the user is owner of the staked account
+        require_keys_eq!(
+            self.stake_account.owner,
+            self.user.key(),
+            ErrorCode::InvalidStakeOwner
+        );
+
+        // accounts to unfreeze the nft
+        let thaw_accounts = ThawAccount {
+            account: self.vault_pda.to_account_info(),
+            authority: self.config.to_account_info(),
+            mint: self.nft_mint.to_account_info(),
+        };
+
+        let thaw_ctx = CpiContext::new(self.token_program.to_account_info(), thaw_accounts);
+
+        thaw_account(thaw_ctx)?;
 
         // transfering the nft from the vault pda to the user account ata
         let cpi_program = self.token_program.to_account_info();

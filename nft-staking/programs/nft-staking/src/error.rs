@@ -7,5 +7,11 @@ pub enum ErrorCode {
     #[msg("Still nft is not frozen")]
     NotFrozen,
     #[msg("No NFTs staked")]
-    NoStakes
+    NoStakes,
+    #[msg("Invalid nft amount")]
+    InvalidNftAmount,
+    #[msg("This NFT is not staked by the current user.")]
+    InvalidStakeOwner,
+    #[msg("Still nft is not thawed.")]
+    StillFrozen,
 }
