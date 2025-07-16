@@ -11,6 +11,7 @@ use crate::{ error::AmmError, state::Config };
 
 #[derive(Accounts)]
 pub struct Swap<'info> {
+    #[account(mut)]
     pub user: Signer<'info>,
 
     pub mint_x: Account<'info, Mint>,
@@ -45,15 +46,17 @@ pub struct Swap<'info> {
     )]
     pub vault_y: Account<'info, TokenAccount>,
     #[account(
-        mut,
+        init_if_needed,
+        payer = user,
         associated_token::mint = mint_x,
         associated_token::authority = user
     )]
     pub user_x: Account<'info, TokenAccount>,
 
     #[account(
-        mut,
-        associated_token::mint= mint_y,
+        init_if_needed,
+        payer = user,
+        associated_token::mint = mint_y,
         associated_token::authority = user
     )]
     pub user_y: Account<'info, TokenAccount>,
@@ -112,8 +115,8 @@ impl<'info> Swap<'info> {
 
     pub fn withdraw(&mut self, is_x: bool, amount: u64) -> Result<()> {
         let (from, to) = match is_x {
-            true => (self.vault_x.to_account_info(), self.user_x.to_account_info()),
-            false => (self.vault_y.to_account_info(), self.user_y.to_account_info()),
+            true => (self.vault_y.to_account_info(), self.user_y.to_account_info()),
+            false => (self.vault_x.to_account_info(), self.user_x.to_account_info()),
         };
 
         let cpi_program = self.token_program.to_account_info();
