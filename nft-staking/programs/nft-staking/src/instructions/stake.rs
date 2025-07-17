@@ -1,10 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    metadata::{MasterEditionAccount, Metadata, MetadataAccount},
-    token::{
-        approve, freeze_account, transfer, Approve, FreezeAccount, Mint, Token, TokenAccount,
-        Transfer,
+    metadata::{
+        mpl_token_metadata::instructions::{
+            FreezeDelegatedAccountCpi, FreezeDelegatedAccountCpiAccounts,
+        },
+        MasterEditionAccount, Metadata, MetadataAccount,
     },
+    token::{approve, Approve, Mint, Token, TokenAccount},
 };
 
 use crate::{error::ErrorCode, StakeAccount, StakeConfig, UserAccount};
@@ -94,6 +96,11 @@ pub struct Stake<'info> {
     pub metadata_program: Program<'info, Metadata>,
 }
 
+// steps we need follow before staking the nft is
+// 1 - approve the nft check the authority, provide delation
+// 2 - freeze the nft so the owner which means user cannot use that anymore for any other purposes
+// here transfering is not necessarly required because the freeze is enough because user can't use ot anymore
+
 impl<'info> Stake<'info> {
     pub fn stake(&mut self, bumps: &StakeBumps) -> Result<()> {
         let clock = Clock::get()?;
@@ -101,6 +108,7 @@ impl<'info> Stake<'info> {
         // checkin the user owner-ship here
         require!(self.user_nft_ata.amount == 1, ErrorCode::InvalidNftAmount);
 
+        assert!(self.user_account.amount_staked < self.config.max_stake);
         // updating the stake config
         self.stake_account.set_inner(StakeAccount {
             owner: self.user.key(),
@@ -108,10 +116,6 @@ impl<'info> Stake<'info> {
             stake_at: clock.unix_timestamp,
             bump: bumps.stake_account,
         });
-
-        // updating the user account details like points and amount staked
-        self.user_account.points += self.config.points_per_stake as u32;
-        self.user_account.amount_staked += 1;
 
         // accounts involved in the approve
         let cpi_approve = Approve {
@@ -124,27 +128,29 @@ impl<'info> Stake<'info> {
         let approve_ctx = CpiContext::new(self.token_program.to_account_info(), cpi_approve);
         approve(approve_ctx, 1)?;
 
-        // transfering the nft from the user to vault after being approved
-        let cpi_accounts = Transfer {
-            from: self.user_nft_ata.to_account_info(),
-            to: self.vault_pda.to_account_info(),
-            authority: self.user.to_account_info(),
+        // updating the user account details like points and amount staked
+        self.user_account.points += self.config.points_per_stake as u32;
+        self.user_account.amount_staked += 1;
+
+        let seeds = &[
+            b"stake",
+            self.user.to_account_info().key.as_ref(),
+            &self.nft_mint.to_account_info().key.as_ref(),
+            &[self.stake_account.bump],
+        ];
+
+        let signers_seeds = &[&seeds[..]];
+
+        let freeze_accounts = FreezeDelegatedAccountCpiAccounts {
+            delegate: &self.stake_account.to_account_info(),
+            edition: &self.edition.to_account_info(),
+            mint: &self.nft_mint.to_account_info(),
+            token_account: &self.user_nft_ata.to_account_info(),
+            token_program: &self.token_program.to_account_info(),
         };
 
-        let transfer_ctx = CpiContext::new(self.token_program.to_account_info(), cpi_accounts);
-
-        transfer(transfer_ctx, 1)?;
-
-        // after the nft being staked user cannot be using that we are freezing that nft
-        let freeze_accounts = FreezeAccount {
-            account: self.vault_pda.to_account_info(), // account where we freeze
-            authority: self.config.to_account_info(),  // who has the authority over the freeze
-            mint: self.nft_mint.to_account_info(),     // which nft is going to be freezed
-        };
-
-        let freeze_ctx = CpiContext::new(self.token_program.to_account_info(), freeze_accounts);
-
-        freeze_account(freeze_ctx)?;
+        FreezeDelegatedAccountCpi::new(&self.token_program.to_account_info(), freeze_accounts)
+            .invoke_signed(signers_seeds)?;
         Ok(())
     }
 }
