@@ -13,13 +13,12 @@ use anchor_spl::{
 use crate::{Listing, Marketplace};
 
 #[derive(Accounts)]
-#[instruction(name:String)]
 pub struct Purchase<'info> {
     #[account(mut)]
     pub buyer: Signer<'info>, // the one who buys the listing
 
     #[account(
-        seeds = [b"marketplace",name.as_str().as_bytes()],
+        seeds = [b"marketplace",marketplace.name.as_str().as_bytes()],
         bump
     )]
     pub marketplace: Account<'info, Marketplace>, // buyer from where he buys the listing

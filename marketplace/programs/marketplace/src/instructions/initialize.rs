@@ -25,7 +25,7 @@ pub struct Initialize<'info> {
 
     // The treasury is a system account that holds the fees collected from the marketplace
     #[account(
-        seeds = [b"marketplace",marketplace.key().as_ref()],
+        seeds = [b"treasury",marketplace.key().as_ref()],
         bump
     )]
     pub treasury: SystemAccount<'info>, //  as this is a system account so no need to initiate this manually
