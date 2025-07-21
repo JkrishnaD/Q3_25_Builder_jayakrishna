@@ -21,6 +21,10 @@ describe("nft-staking", () => {
   anchor.setProvider(provider);
   const program = anchor.workspace.nftStaking as Program<NftStaking>;
 
+  const METADATA_PROGRAM_ID = new PublicKey(
+    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+  );
+
   const user = provider.wallet;
   let userAccountPda: anchor.web3.PublicKey;
   let configPda: anchor.web3.PublicKey;
@@ -31,6 +35,11 @@ describe("nft-staking", () => {
   let vaultPda: anchor.web3.PublicKey;
   let vaultBump: number;
   let stakePda: PublicKey;
+
+  // variables required for the nft approve and freeze
+  let collectionMint: PublicKey;
+  let metadataPda: PublicKey;
+  let editionPda: PublicKey;
 
   const POINTS_PER_STAKE = 10;
   const MAX_UNSTAKE = 5;
@@ -70,11 +79,38 @@ describe("nft-staking", () => {
       program.programId
     );
 
+    [metadataPda] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("metadata"),
+        METADATA_PROGRAM_ID.toBuffer(),
+        nftMint.toBuffer(),
+      ],
+      METADATA_PROGRAM_ID
+    );
+
+    [editionPda] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("metadata"),
+        METADATA_PROGRAM_ID.toBuffer(),
+        nftMint.toBuffer(),
+        Buffer.from("edition"),
+      ],
+      METADATA_PROGRAM_ID
+    );
+
     userNftAccount = await createAssociatedTokenAccount(
       provider.connection,
       user.payer,
       nftMint,
       user.publicKey
+    );
+
+    collectionMint = await createMint(
+      provider.connection,
+      user.payer,
+      user.publicKey,
+      user.publicKey,
+      0
     );
 
     await mintTo(
@@ -134,8 +170,9 @@ describe("nft-staking", () => {
         userAccount: userAccountPda,
         userNftAta: userNftAccount,
         vaultPda,
-        rent: SYSVAR_RENT_PUBKEY,
-        clock: SYSVAR_CLOCK_PUBKEY,
+        collectionMint,
+        edition: editionPda,
+        metadata: metadataPda,
       })
       .rpc();
     console.log("Your transaction signature", tx);
@@ -166,6 +203,8 @@ describe("nft-staking", () => {
         userAccount: userAccountPda,
         userNftAta: userNftAccount,
         vaultPda,
+        collectionMint,
+        edition: editionPda,
       })
       .rpc();
 
