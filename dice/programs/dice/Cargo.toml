@@ -19,5 +19,5 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = "0.31.1"
-anchor-instruction-sysvar = { git = "https://github.com/ShrinathNR/anchor-instruction-sysvar.git", branch = "version-upgrade" }
 solana-program = "2.3.0"
+switchboard-on-demand = "0.4.9"
