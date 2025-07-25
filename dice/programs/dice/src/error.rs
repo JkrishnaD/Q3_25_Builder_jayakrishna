@@ -15,5 +15,5 @@ pub enum BetErrorCode {
     #[msg("Randomness is expired!")]
     RandomnessExpired,
     #[msg("Insuffient funds with the house")]
-    InsufficientFunds
+    InsufficientFunds,
 }

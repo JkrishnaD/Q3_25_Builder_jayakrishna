@@ -18,7 +18,7 @@ declare_id!("HYJiJVyBohJ18UBQrnB3jMr3Wwxk5wiHN1qP2gSqm89y");
 pub mod dice {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>,amount:u64) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, amount: u64) -> Result<()> {
         ctx.accounts.init(amount)?;
         Ok(())
     }

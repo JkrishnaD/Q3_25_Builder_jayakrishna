@@ -1,6 +1,9 @@
-use anchor_lang::{ prelude::*, system_program::{ transfer, Transfer } };
+use anchor_lang::{
+    prelude::*,
+    system_program::{transfer, Transfer},
+};
 
-use crate::{ error::BetErrorCode, Bet };
+use crate::{error::BetErrorCode, Bet};
 
 #[derive(Accounts)]
 #[instruction(seed:u128)]
@@ -38,13 +41,12 @@ impl<'info> PlaceBet<'info> {
         amount: u64,
         roll: u8,
         seed: u128,
-        randomness_account:Pubkey,
-        bumps: &PlaceBetBumps
+        randomness_account: Pubkey,
+        bumps: &PlaceBetBumps,
     ) -> Result<()> {
-        if
-            self.bet.is_resolved == false &&
-            self.bet.commit_slot != 0 &&
-            self.bet.key() != Pubkey::default()
+        if self.bet.is_resolved == false
+            && self.bet.commit_slot != 0
+            && self.bet.key() != Pubkey::default()
         {
             return Err(BetErrorCode::BetAlreadyPlaced.into());
         }

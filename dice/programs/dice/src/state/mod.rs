@@ -10,8 +10,7 @@ pub struct Bet {
     pub roll: u8,
     pub bump: u8,
 
-    pub randomness_account:Pubkey,
-    pub commit_slot:u64,
-    pub is_resloved:bool
+    pub randomness_account: Pubkey,
+    pub commit_slot: u64,
+    pub is_resloved: bool,
 }
-

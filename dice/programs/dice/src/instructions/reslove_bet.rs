@@ -1,7 +1,10 @@
-use anchor_lang::{ prelude::*, system_program::{ transfer, Transfer } };
+use crate::{error::BetErrorCode, Bet};
+use anchor_lang::{
+    prelude::*,
+    system_program::{transfer, Transfer},
+};
 use solana_program::{clock, keccak::hash};
 use switchboard_on_demand::RandomnessAccountData;
-use crate::{ error::BetErrorCode, Bet };
 
 pub const HOUSE_EDGE: u16 = 150;
 
@@ -45,11 +48,15 @@ impl<'info> ResloveBet<'info> {
         }
 
         // parsing the random data from the switchboard
-        let randomness_data = RandomnessAccountData::parse(
-            self.randomness_account.data.borrow()
-        ).map_err(|_| BetErrorCode::FailedToParseRandomness)?;
+        let randomness_data = RandomnessAccountData::parse(self.randomness_account.data.borrow())
+            .map_err(|_| BetErrorCode::FailedToParseRandomness)?;
 
-        // getting the randomness and deriving the dice roll 
+        // the randomness of the data should be from the current slot
+        if randomness_data.seed_slot != bet.commit_slot {
+            return Err(BetErrorCode::RandomnessExpired.into());
+        }
+
+        // getting the randomness and deriving the dice roll
         let revealed_random_value = randomness_data
             .get_value(&clock)
             .map_err(|_| BetErrorCode::RandomnessNotResloved);
@@ -74,9 +81,9 @@ impl<'info> ResloveBet<'info> {
             let payout = fair_payout - house_cut;
         }
 
-        // transfering the seeds 
+        // transfering the seeds
         if payout_amount > 0 {
-            if payout_amount < self.vault.to_account_info().lamports(){
+            if payout_amount < self.vault.to_account_info().lamports() {
                 return Err(BetErrorCode::InsufficientFunds);
             }
 
@@ -91,13 +98,13 @@ impl<'info> ResloveBet<'info> {
             let ctx = CpiContext::new_with_signer(
                 self.system_program.to_account_info(),
                 accounts,
-                signer
+                signer,
             );
 
             transfer(ctx, payout_amount)?;
         }
 
-        //
+        // marking the bet as resloved
         bet.is_resloved = true;
 
         Ok(())
