@@ -1,0 +1,6 @@
+dev-wallet.json
+/dist
+/node_modules
+/.env
+Turbin3-wallet.json
+*wallet.json
